@@ -1,0 +1,45 @@
+{
+  "estado": "SUCCESS",
+  "objetivo_url": "https://www.vogue.es",
+  "fecha_escaneo": "2026-06-11T09:43:00Z",
+  
+  "vista": {
+    "dominio": "vogue.es",
+    "estado_red": "ONLINE",
+    "tiempo_respuesta_ms": 245,
+    "captura_pantalla_url": "https://robot-storage.com/capturas/vogue_es.png"
+  },
+  
+  "tecnologia": {
+    "servidor_core": "CloudFront / Nginx",
+    "frameworks": ["React", "Next.js"],
+    "trackers_vigilancia": ["Google Analytics", "Meta Pixel"],
+    "infraestructura_red": "Open Graph Protocol",
+    "ssl_valido": true
+  },
+  
+  "enlaces": [
+    "https://www.vogue.es/privacy-policy",
+    "https://www.condenast.com/privacy-policy",
+    "https://www.vogue.es/fashion",
+    "https://www.vogue.es/belleza",
+    "https://www.vogue.es/living"
+  ],
+  
+  "metricas": {
+    "totales": {
+      "imagenes": 89,
+      "parrafos": 42,
+      "scripts": 25,
+      "inputs": 3,
+      "articulos": 5
+    },
+    "top_palabras": [
+      { "palabra": "fashion", "frecuencia": 85 },
+      { "palabra": "style", "frecuencia": 53 },
+      { "palabra": "tendencias", "frecuencia": 42 },
+      { "palabra": "vogue", "frecuencia": 28 },
+      { "palabra": "coleccion", "frecuencia": 15 }
+    ]
+  }
+}
