@@ -15,6 +15,12 @@ const coloresTech = {
     "Node.js": "#339933",    
     "Google Analytics": "#e37400" 
 }
+// Sonidos
+const sndClick = new Audio('sonidos/click.mp3');
+const sndRadar = new Audio('sonidos/radar.mp3');
+sndRadar.loop = true; 
+const sndExito = new Audio('sonidos/exito.mp3');
+const sndError = new Audio('sonidos/error.mp3');
 
 /* 2. EL GATILLO DE ACCIÓN */
 botonEscaneo.addEventListener('click', iniciarOperacion);
@@ -24,12 +30,29 @@ async function iniciarOperacion() {
     const urlIngresada = inputObjetivo.value;
     
     if (urlIngresada.trim() === '') {
-        alert('[ERROR TÁCTICO]: Ingrese un dominio objetivo válido.');
-        return;
+        sndError.play(); 
+        inputObjetivo.style.border = "1px solid var(--color-alerta)";
+        inputObjetivo.style.boxShadow = "0 0 10px var(--color-alerta)";
+        inputObjetivo.value = "";
+        inputObjetivo.placeholder = "[ ERROR: DOMINIO REQUERIDO ]";
+        setTimeout(() => {
+            inputObjetivo.style.border = "1px solid var(--color-terminal)";
+            inputObjetivo.style.boxShadow = "0 0 10px var(--color-terminal)";
+            inputObjetivo.placeholder = "Ingrese dominio objetivo ...";
+        }, 2000);
+
+        const msjErrorInput = '<span style="color: var(--color-alerta)">[ERROR DE SINTAXIS: PARÁMETRO VACÍO]</span>';
+        panelVista.innerHTML = msjErrorInput;
+        panelTech.innerHTML = msjErrorInput;
+        panelEnlaces.innerHTML = msjErrorInput;
+        panelMetricas.innerHTML = msjErrorInput;
+        return; 
     }
     botonEscaneo.innerText = '[ ESCANEANDO... ]';
     botonEscaneo.classList.add('boton-escaneando');
     botonEscaneo.disabled = true;
+    sndClick.play(); 
+    sndRadar.play() 
     
     /* 4. ESTADO DE CARGA (Mientras esperamos al Backend) */
     const mensajeCarga = `
@@ -43,44 +66,40 @@ async function iniciarOperacion() {
     panelEnlaces.innerHTML = mensajeCarga;
     panelMetricas.innerHTML = mensajeCarga;
     inputObjetivo.value = ''; // Limpiamos el input
-
-    /*
-    try {
-        const respuesta = await fetch('http://localhost:3000/api/escanear', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ url: urlIngresada })
-        });
-        const datos = await respuesta.json();
-    * / 
-    /* 5. EL DISPARO A LA RED (Fetch) */
+    //http://localhost:3000/api/escanear
     try {
         const [respuesta] = await Promise.all([
-            fetch('datos.json'),
-            new Promise(resolve => setTimeout(resolve, 3000)) // segundo de retardo visual para ver los loading
-        ])
+            fetch('http://localhost:3000/api/escanear', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ url: urlIngresada })
+            }),
+            new Promise(resolve => setTimeout(resolve, 3000)) 
+        ]);
         if (!respuesta.ok) {
-            throw new Error('No se encontró datos.json')
+            throw new Error(`Enlace rechazado. Status: ${respuesta.status}`);
         }
-        const datos = await respuesta.json();
+        const datos = await respuesta.json()
+        sndRadar.pause();           
+        sndRadar.currentTime = 0;  
         // --- PANEL 1: VISTA  ---
         panelVista.innerHTML = `
             <div style="border: 1px solid var(--color-terminal); height: 120px; margin-bottom: 15px; position: relative; overflow: hidden; background: #000;">
                 
-                <img id="img-target-visor" src="${datos.vista.imagen_principal}" class="miniatura-target" alt="Imagen principal" style="width: 100%; height: 100%; object-fit: cover; opacity: 0.4;">
+                <img id="img-target-visor" src="${datos.vista.imagen_principal}" class="miniatura-target animacion-fade" alt="Imagen principal" style="width: 100%; height: 100%; object-fit: cover; cursor: crosshair;">
                 
                 <span style="position: absolute; bottom: 5px; right: 5px; font-size: 0.75rem; background: rgba(0,0,0,0.8); padding: 2px 6px; border: 1px solid var(--color-terminal); z-index: 10; pointer-events: none;">[IMAGEN DEL TARGET: ${datos.vista.dominio}]</span>
             </div> 
             <p>> ESTADO RED: <span style="color: var(--color-terminal)">${datos.vista.estado_red}</span></p>
             <p>> LATENCIA: ${datos.vista.tiempo_respuesta_ms} ms</p>
         `;
-        /*Se crea el visor tactico*/
-       document.getElementById('img-target-visor').addEventListener('click', () => {
+        document.getElementById('img-target-visor').addEventListener('click', () => {
             const visor = document.getElementById('visor-tactico');
-            const imagenAmpliada = document.getElementById('imagen-ampliada');
-            imagenAmpliada.src = datos.vista.imagen_principal;
+            document.getElementById('imagen-ampliada').src = datos.vista.imagen_principal;
             visor.classList.add('visibilidad-activa'); 
         });
+
+
         // --- PANEL 2: TECNOLOGÍA(Con colores en cada tecnología) ---
         const listaTrackers = datos.tecnologia.trackers_vigilancia.map(vg => {
             const colorElegido = coloresTech[vg] || 'var(--color-terminal)';
@@ -111,11 +130,11 @@ async function iniciarOperacion() {
         panelTech.innerHTML = '<div id="tipeo-tech"></div>';
         setTimeout(() => {
             new Typed('#tipeo-tech', {
-                strings: [contenidoTech], // Le pasamos tu variable de texto
-                typeSpeed: 10,            // Velocidad: 10 milisegundos por letra (rápido y táctico)
-                showCursor: true,         // Muestra el cursor al final
-                cursorChar: '█',          // Cambiamos la rayita por un bloque hacker
-                contentType: 'html'       // CRÍTICO: Le dice que interprete las etiquetas HTML y no las escriba
+                strings: [contenidoTech], 
+                typeSpeed: 10,
+                showCursor: true,         
+                cursorChar: '█',          
+                contentType: 'html' 
             });
         }, 100);
 
@@ -125,7 +144,7 @@ async function iniciarOperacion() {
         setTimeout(() => {
             new Typed('#tipeo-enlaces', {
                 strings: [listaEnlaces],
-                typeSpeed: 20,
+                typeSpeed: 15,
                 showCursor: true,
                 cursorChar: '█',
                 contentType: 'html'
@@ -140,11 +159,11 @@ async function iniciarOperacion() {
                     <span>[${item.frecuencia}]</span>
                 </div>
                 <div style="width: 100%; height: 8px; background: rgba(220, 38, 38, 0.2); margin-top: 2px;">
-                    <div id="barra-lexica-${index}" style="width: 0%; height: 100%; background: var(--color-terminal); box-shadow: 0 0 5px var(--color-terminal); transition: width 1.5s ease-out;"></div>
+                    <div class="animacion-barra" style="--ancho-final: ${item.frecuencia}%; height: 100%; background: var(--color-terminal); box-shadow: 0 0 5px var(--color-terminal);"></div>
                 </div>
             </div>
         `).join('');
-
+                
         panelMetricas.innerHTML = `
             <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--color-terminal); padding-bottom: 10px; margin-bottom: 10px;">
                 <span>IMÁGENES: ${datos.metricas.totales.imagenes}</span>
@@ -153,21 +172,15 @@ async function iniciarOperacion() {
             </div>
             <p style="color: var(--color-alerta)">> ANÁLISIS DE FRECUENCIA LÉXICA:</p>
             ${barrasPalabras}
-        `
-        setTimeout(() => {
-            datos.metricas.top_palabras.forEach((item, index) => {
-                const barra = document.getElementById(`barra-lexica-${index}`);
-                if (barra) {
-                    barra.style.width = item.frecuencia + '%';
-                }
-            });
-        }, 100);
-
-
+        `;
         botonEscaneo.innerText = '[INICIAR_ESCANEO]';
         botonEscaneo.classList.remove('boton-escaneando');
         botonEscaneo.disabled = false;
     } catch (error) {
+        sndRadar.pause();           
+        sndRadar.currentTime = 0;
+        sndError.play();           
+        console.error("[REPORTE DE DAÑOS FATAL]:", error); 
         const msjError = '<span style="color: var(--color-alerta)">[FALLO DE ENLACE: BÚNKER CENTRAL NO RESPONDE]</span>';
         panelVista.innerHTML = msjError;
         panelTech.innerHTML = msjError;
@@ -177,6 +190,7 @@ async function iniciarOperacion() {
         botonEscaneo.classList.remove('boton-escaneando');
         botonEscaneo.disabled = false;
     }
+    sndExito.play();
 }
 const visor = document.getElementById('visor-tactico');
 if (visor) {

@@ -238,3 +238,23 @@ body::after {
     50% { transform: scaleX(1); opacity: 1; }
     100% { transform: scaleX(0); opacity: 0; }
 }
+
+/*ANIMACIONES PARA PODER USAR EL TYPE EN PANEL 1 Y 4*/
+@keyframes fade-tactico {
+    from { opacity: 0; }
+    to { opacity: 0.4; } /* Termina en 0.4 para mantener tu marca de agua legible */
+}
+
+.animacion-fade {
+    animation: fade-tactico 1.5s ease-out forwards;
+}
+
+/* Estiramiento de las barras del Panel 4 */
+@keyframes llenar-barra {
+    from { width: 0%; }
+    to { width: var(--ancho-final); }
+}
+
+.animacion-barra {
+    animation: llenar-barra 1.5s ease-out forwards;
+}
