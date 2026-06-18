@@ -1,0 +1,26 @@
+{
+  "name": "tp2",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Gabiimartire/Grupo5-FrontEnd.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Gabiimartire/Grupo5-FrontEnd/issues"
+  },
+  "homepage": "https://github.com/Gabiimartire/Grupo5-FrontEnd#readme",
+  "dependencies": {
+    "axios": "^1.18.0",
+    "cheerio": "^1.2.0",
+    "cors": "^2.8.6",
+    "express": "^5.2.1"
+  }
+}
