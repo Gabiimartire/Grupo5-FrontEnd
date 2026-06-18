@@ -5,6 +5,8 @@
     --color-alerta: #fbbf24;
     --borde-panel: 1px solid #dc2626;
     --sombra-neon: 0 0 10px rgba(220, 38, 38, 0.15);
+    --color-links: #008F11;
+    --sombra-links: #00FF41;
 }
 
 /* 2. LA LEY CONSTITUCIONAL Y RESETEO */
@@ -23,6 +25,14 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
+}
+header{
+    display: flex;
+    align-items: center;
+}
+header .prompt-text{
+    text-shadow: 0 0 10px var(--color-terminal);
+    font-weight: bolder;
 }
 /* 4. CONTENEDOR MAESTRO */
 .bunker-container {
@@ -60,16 +70,17 @@ body {
     font-weight: bold;
     font-family: inherit;
     cursor: pointer;
-    transition: 0.2s;
+    transition: 0.5s;
 }
 .consola-input button:hover {
     background-color: var(--color-alerta);
     box-shadow: 0 0 15px var(--color-alerta);
+    transition: 0.2s;
 }
 /* enfasis en el input seleccionado*/
 .consola-input input:focus {
     box-shadow: 0 5px 10px var(--color-alerta);
-    transition: 0.2s;
+    transition: 0.5s;
 }
 
 /* 6. GRILLA TÁCTICA (CSS GRID) */
@@ -81,6 +92,8 @@ body {
     grid-template-rows: 1fr 1fr;
     gap: 20px;
     flex-grow: 1;
+    /**para que se pueda agregar scroll para los paneles*/
+    min-height: 0;
 }
 /* 7. DISEÑO DE CADA PANEL */
 .panel {
@@ -88,14 +101,24 @@ body {
     background-color: #0a0a0a;
     display: flex;
     flex-direction: column;
-    padding: 15px;
     box-shadow: var(--sombra-neon);
+    /* para agregar scroll en cada  panel */
+    
+    min-height: 0; 
+    overflow: hidden
+}
+.panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--color-terminal);
+    opacity: 0.8;
+    padding: 8px 15px;
 }
 .panel-titulo {
     font-size: 1rem;
-    border-bottom: 1px dashed var(--color-terminal);
-    padding-bottom: 10px;
-    margin-bottom: 15px;
+    border-bottom: none;
+    margin: 0;
     color: var(--color-alerta);
 }
 /* 8. EL CONTROL DE DESBORDAMIENTO (OVERFLOW) */
@@ -103,21 +126,115 @@ body {
     flex-grow: 1;
     font-size: 0.9rem;
     line-height: 1.5;
+    padding: 20px 15px 15px 15px;
 }
 .scroll-activo {
     /* La orden que evita que el diseño explote */
     overflow-y: auto;
     max-height: 100%;
 }
-ul .framework{
-    list-style: none;
-    padding: 10px;
-    background-color: #0a0a0a;
+
+body::after {
+    content: " ";
+    display: block;
+    position: absolute;
+    top: 0; left: 0; bottom: 0; right: 0;
+    /* Crea micro-líneas horizontales oscuras */
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
+    background-size: 100% 4px;
+    z-index: 100;
+    /* Evita que el efecto bloquee los clics en tu input y botones */
+    pointer-events: none; 
 }
+
+.boton-escaneando {
+    background-color: var(--color-alerta);
+    color: #000 ;
+    border-color: var(--color-alerta) ;
+    box-shadow: 0 0 20px var(--color-alerta) ;
+    cursor: not-allowed ; /* Cambia la flechita por el símbolo de prohibido */
+    animation: pulso-carga 0.8s infinite alternate;
+}
+@keyframes pulso-carga {
+    from { opacity: 1; }
+    to { opacity: 0.4; }
+}
+/* links con color matrix */
+.links{ 
+    color: var(--color-links);
+    text-shadow: 0 0 5px var(--sombra-links);
+    padding-left: 5px;
+    display: block; /*salto de linea*/
+    text-decoration: none;
+}
+.links:hover {
+    color: var(--sombra-links);
+    text-shadow: 0 0 10px var(--sombra-links);
+    transition: 0.3s;
+}
+/* estilos del visor táctico */
+#visor-tactico { /*posicionado en frente con opacity 0 para poder hacer efecto transition*/
+    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+    background-color: rgba(0, 0, 0, 0.9);
+    z-index: 9999;     
+    display: flex; flex-direction: column; justify-content: center; align-items: center;
+    opacity: 0;
+    pointer-events: none;    
+    transition: opacity 0.8s ease-in-out; 
+}
+#visor-tactico.visibilidad-activa {
+    opacity: 1;             
+    pointer-events: auto;    
+}
+#imagen-ampliada {
+    max-width: 90%; max-height: 80%;
+    border: 2px solid var(--color-terminal);
+    box-shadow: 0 0 30px var(--color-terminal);
+}
+.cerrar-visor { color: var(--color-alerta); font-size: 1.2rem; font-weight: bold; margin-bottom: 20px; cursor: pointer; text-shadow: 0 0 10px var(--color-alerta); }
+.cerrar-visor:hover { color: var(--color-terminal); }
+.miniatura-target { cursor: crosshair; transition: 0.3s; }
+.miniatura-target:hover { opacity: 0.8 !important; }
+
+
+
 /* Detalles para embellecer la barra de scroll (opcional pero cool) */
 ::-webkit-scrollbar {
     width: 8px;
 }
 ::-webkit-scrollbar-thumb {
     background: var(--color-terminal);
+}
+
+/*loaders*/
+.loader-tactico {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    min-height: 100px; 
+    color: var(--color-alerta);
+    text-shadow: 0 0 5px var(--color-alerta);
+}
+.loader-texto {
+    animation: parpadeo-alerta 1s infinite alternate;
+}
+.loader-barra {
+    width: 60%;
+    height: 2px;
+    background-color: var(--color-alerta);
+    box-shadow: 0 0 10px var(--color-alerta);
+    margin-top: 10px;
+    animation: barrido-radar 1.2s infinite ease-in-out;
+    transform-origin: center;
+}
+@keyframes parpadeo-alerta {
+    0% { opacity: 0.3; }
+    100% { opacity: 1; }
+}
+@keyframes barrido-radar {
+    0% { transform: scaleX(0); opacity: 0; }
+    50% { transform: scaleX(1); opacity: 1; }
+    100% { transform: scaleX(0); opacity: 0; }
 }
