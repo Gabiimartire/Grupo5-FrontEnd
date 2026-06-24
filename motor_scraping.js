@@ -1,89 +1,249 @@
 // motor_scraping.js
 const axios = require('axios');
 const cheerio = require('cheerio');
-
+const puppeteer = require('puppeteer');
 async function ejecutarScraping(url) {
-    let objetivo = url;
-    if (!objetivo.startsWith('http')) {
-        objetivo = 'https://' + objetivo;
-    }
 
-    const tiempoInicio = Date.now();
+    let browser;
 
     try {
-        // Disparo de Axios
-        const respuesta = await axios.get(objetivo, {
-            timeout: 10000,
-            headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) TargetAnalyzer/1.0' }
+
+        let objetivo = url;
+
+        if (!objetivo.startsWith('http')) {
+            objetivo = 'https://' + objetivo;
+        }
+
+        const inicio = Date.now();
+
+        browser = await puppeteer.launch({
+            headless: true,
+            args: [
+                '--no-sandbox',
+                '--disable-setuid-sandbox'
+            ]
         });
 
-        const latencia = Date.now() - tiempoInicio;
-        const html = respuesta.data;
-        const $ = cheerio.load(html);
+        const page = await browser.newPage();
 
-        // Procesamiento
-        const urlObj = new URL(objetivo);
-        const dominioLimpio = urlObj.hostname;
+        await page.setUserAgent(
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/125.0 Safari/537.36'
+        );
 
-        let imgPrincipal = $('meta[property="og:image"]').attr('content') || 
-                           $('img').first().attr('src') || 
-                           'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=500&auto=format&fit=crop';
-        
-        if (imgPrincipal.startsWith('/')) imgPrincipal = `https://${dominioLimpio}${imgPrincipal}`;
+        await page.goto(objetivo, {
+            waitUntil: 'domcontentloaded',
+            timeout: 30000
+        });
+        await new Promise(resolve => setTimeout(resolve, 3000));
+        const latencia = Date.now() - inicio;
 
-        const serverHeader = respuesta.headers['server'] || 'Desconocido / Oculto';
+        const html = await page.content();
 
-        const enlacesEncontrados = [];
-        $('a').each((i, link) => {
-            let href = $(link).attr('href');
-            if (href && href.startsWith('http') && enlacesEncontrados.length < 6) {
-                enlacesEncontrados.push(href);
-            }
+        // =========================
+        // PANEL 1 - IMÁGENES
+        // =========================
+
+        const imagenes = await page.evaluate(() => {
+
+            const urls = [];
+
+            document.querySelectorAll('img').forEach(img => {
+
+                const src =
+                    img.src ||
+                    img.dataset.src ||
+                    img.dataset.lazySrc ||
+                    img.dataset.original;
+
+                if (src) {
+                    urls.push(src);
+                }
+
+            });
+
+            return urls;
+
         });
 
-        const frameworksDetectados = [];
-        if (html.includes('_next')) frameworksDetectados.push('Next.js');
-        if (html.includes('react')) frameworksDetectados.push('React');
-        if (html.includes('vue')) frameworksDetectados.push('Vue');
-        if (html.includes('tailwind')) frameworksDetectados.push('Tailwind CSS');
-        if (frameworksDetectados.length === 0) frameworksDetectados.push('HTML Nativo');
+        const imagenesLimpias = [...new Set(imagenes)]
+            .filter(img => img.startsWith('http'))
+            .slice(0, 20);
 
-        const trackersDetectados = [];
-        if (html.includes('google-analytics') || html.includes('gtag')) trackersDetectados.push('Google Analytics');
-        if (html.includes('fbevents')) trackersDetectados.push('Meta Pixel');
-        if (html.includes('hotjar')) trackersDetectados.push('Hotjar');
-        if (trackersDetectados.length === 0) trackersDetectados.push('Sin trackers evidentes');
+        // =========================
+        // PANEL 2 - TECNOLOGÍAS
+        // =========================
 
-        // Retornamos el paquete JSON formateado
+        const frameworks = [];
+
+        const htmlLower = html.toLowerCase();
+
+        if (htmlLower.includes('_next')) {
+            frameworks.push('Next.js');
+        }
+
+        if (htmlLower.includes('react')) {
+            frameworks.push('React');
+        }
+
+        if (htmlLower.includes('vue')) {
+            frameworks.push('Vue');
+        }
+
+        if (htmlLower.includes('angular')) {
+            frameworks.push('Angular');
+        }
+
+        if (htmlLower.includes('tailwind')) {
+            frameworks.push('Tailwind CSS');
+        }
+
+        if (!frameworks.length) {
+            frameworks.push('HTML Nativo');
+        }
+
+        // =========================
+        // TRACKERS
+        // =========================
+
+        const trackers = [];
+
+        if (
+            htmlLower.includes('google-analytics') ||
+            htmlLower.includes('gtag')
+        ) {
+            trackers.push('Google Analytics');
+        }
+
+        if (htmlLower.includes('fbevents')) {
+            trackers.push('Meta Pixel');
+        }
+
+        if (htmlLower.includes('hotjar')) {
+            trackers.push('Hotjar');
+        }
+
+        if (!trackers.length) {
+            trackers.push('Sin trackers evidentes');
+        }
+
+        // =========================
+        // PANEL 3 - ENLACES
+        // =========================
+
+        const enlaces = await page.evaluate(() => {
+
+            return [...document.links]
+                .map(link => link.href)
+                .filter(Boolean)
+                .slice(0, 20);
+
+        });
+
+        // =========================
+        // PANEL 4 - MÉTRICAS
+        // =========================
+
+        const metricas = await page.evaluate(() => {
+
+            return {
+                imagenes: document.images.length,
+                parrafos: document.querySelectorAll('p').length,
+                scripts: document.scripts.length
+            };
+
+        });
+
+        // =========================
+        // TOP PALABRAS
+        // =========================
+
+        const topPalabras = await page.evaluate(() => {
+
+            const texto = document.body?.innerText || '';
+
+            const palabras = texto
+                .toLowerCase()
+                .replace(/[^\w\s]/g, '')
+                .split(/\s+/);
+
+            const contador = {};
+
+            palabras.forEach(palabra => {
+
+                if (palabra.length < 4) return;
+
+                contador[palabra] =
+                    (contador[palabra] || 0) + 1;
+
+            });
+
+            return Object.entries(contador)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 4)
+                .map(([palabra, frecuencia]) => ({
+                    palabra,
+                    frecuencia: Math.min(frecuencia, 100)
+                }));
+
+        });
+
+        console.log(
+            `[SCRAPER] ${imagenesLimpias.length} imágenes | ${enlaces.length} enlaces`
+        );
+
         return {
-            "vista": {
-                "imagen_principal": imgPrincipal,
-                "dominio": dominioLimpio,
-                "estado_red": "ONLINE",
-                "tiempo_respuesta_ms": latencia
+
+            vista: {
+                imagenes: imagenesLimpias,
+                dominio: new URL(objetivo).hostname,
+                estado_red: 'ONLINE',
+                tiempo_respuesta_ms: latencia
             },
-            "tecnologia": {
-                "servidor_core": serverHeader,
-                "ssl_valido": objetivo.startsWith('https'),
-                "frameworks": frameworksDetectados,
-                "trackers_vigilancia": trackersDetectados
+
+            tecnologia: {
+                servidor_core: 'Detectado',
+                ssl_valido: objetivo.startsWith('https'),
+                frameworks,
+                trackers_vigilancia: trackers
             },
-            "enlaces": enlacesEncontrados.length > 0 ? enlacesEncontrados : ["[ SIN ENLACES EXTERNOS DETECTADOS ]"],
-            "metricas": {
-                "totales": { "imagenes": $('img').length, "parrafos": $('p').length, "scripts": $('script').length },
-                "top_palabras": [
-                    { "palabra": "HTML", "frecuencia": 80 },
-                    { "palabra": "BODY", "frecuencia": 65 },
-                    { "palabra": "DIV", "frecuencia": 45 },
-                    { "palabra": "SPAN", "frecuencia": 30 }
-                ] 
+
+            enlaces: enlaces.length
+                ? enlaces
+                : ['[ SIN ENLACES DETECTADOS ]'],
+
+            metricas: {
+
+                totales: {
+                    imagenes: metricas.imagenes,
+                    parrafos: metricas.parrafos,
+                    scripts: metricas.scripts
+                },
+
+                top_palabras: topPalabras.length
+                    ? topPalabras
+                    : [
+                        { palabra: 'html', frecuencia: 80 },
+                        { palabra: 'body', frecuencia: 60 },
+                        { palabra: 'div', frecuencia: 40 },
+                        { palabra: 'span', frecuencia: 20 }
+                    ]
             }
         };
+
     } catch (error) {
-        // En caso de fallo táctico, lanzamos el error para que el backend lo maneje
-        throw new Error("El objetivo bloqueó la conexión o no existe.");
+
+        console.error(error);
+
+        throw new Error(
+            'El objetivo bloqueó la conexión o no existe.'
+        );
+
+    } finally {
+
+        if (browser) {
+            await browser.close();
+        }
+
     }
 }
-
-// Exportamos la función para que el backend pueda usarla
 module.exports = { ejecutarScraping };

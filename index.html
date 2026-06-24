@@ -40,9 +40,22 @@
             </section>
         </main>
     </div>
-    <div id="visor-tactico" class="visor-oculto">
-        <span class="cerrar-visor">[X] CERRAR ENLACE VISUAL</span>
-        <img id="imagen-ampliada" src="" alt="Target Ampliado">
+   <div id="visor-tactico" class="visor-oculto">
+        <span class="cerrar-visor">
+            [X] CERRAR VISOR
+        </span>
+        <div class="contenedor-imagen">
+            <button id="btn-anterior" class="btn-nav-img">
+                ◀
+            </button>
+            <img id="imagen-ampliada" src="" alt="Target Ampliado">
+            <button id="btn-siguiente" class="btn-nav-img">
+                ▶
+            </button>
+        </div>
+        <div id="contador-imagen">
+            [1 / 1]
+        </div>
     </div>
     <script src="https://unpkg.com/typed.js@2.1.0/dist/typed.umd.js"></script>
     <script src="main.js"></script>

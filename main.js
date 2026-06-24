@@ -15,6 +15,27 @@ const coloresTech = {
     "Node.js": "#339933",    
     "Google Analytics": "#e37400" 
 }
+//Almacenar imagenes dependiendo de como la envien y atajar cualquier forma
+let imagenesTarget = [];
+let indiceImagenActual = 0;
+function mostrarImagenActual(){
+    if(!imagenesTarget.length) return;
+    const img = document.getElementById('imagen-ampliada');
+    const contador = document.getElementById('contador-imagen');
+    img.src = imagenesTarget[indiceImagenActual];
+    contador.textContent =
+        `[${indiceImagenActual + 1} / ${imagenesTarget.length}]`;
+    const btnAnt = document.getElementById('btn-anterior');
+    const btnSig = document.getElementById('btn-siguiente');
+    if(imagenesTarget.length <= 1){
+        btnAnt.style.display = 'none';
+        btnSig.style.display = 'none';
+    } else {
+        btnAnt.style.display = 'block';
+        btnSig.style.display = 'block';
+    }
+}
+
 // Sonidos
 const sndClick = new Audio('sonidos/click.mp3');
 const sndRadar = new Audio('sonidos/radar.mp3');
@@ -80,26 +101,37 @@ async function iniciarOperacion() {
             throw new Error(`Enlace rechazado. Status: ${respuesta.status}`);
         }
         const datos = await respuesta.json()
+        imagenesTarget = datos.vista.imagenes || [];        
         sndRadar.pause();           
         sndRadar.currentTime = 0;  
         // --- PANEL 1: VISTA  ---
         panelVista.innerHTML = `
-            <div style="border: 1px solid var(--color-terminal); height: 120px; margin-bottom: 15px; position: relative; overflow: hidden; background: #000;">
-                
-                <img id="img-target-visor" src="${datos.vista.imagen_principal}" class="miniatura-target animacion-fade" alt="Imagen principal" style="width: 100%; height: 100%; object-fit: cover; cursor: crosshair;">
-                
-                <span style="position: absolute; bottom: 5px; right: 5px; font-size: 0.75rem; background: rgba(0,0,0,0.8); padding: 2px 6px; border: 1px solid var(--color-terminal); z-index: 10; pointer-events: none;">[IMAGEN DEL TARGET: ${datos.vista.dominio}]</span>
-            </div> 
-            <p>> ESTADO RED: <span style="color: var(--color-terminal)">${datos.vista.estado_red}</span></p>
-            <p>> LATENCIA: ${datos.vista.tiempo_respuesta_ms} ms</p>
-        `;
+    <div style="border: 1px solid var(--color-terminal); height: 120px; margin-bottom: 15px; position: relative; overflow: hidden; background: #000;">
+        <img
+            id="img-target-visor"
+            src="${imagenesTarget[0]}"
+            class="miniatura-target animacion-fade"
+            alt="Imagen principal"
+            style="width:100%;height:100%;object-fit:cover;cursor:crosshair;"
+        >
+        <span style="position:absolute;bottom:5px;right:5px;font-size:0.75rem;background:rgba(0,0,0,0.8);padding:2px 6px;border:1px solid var(--color-terminal);z-index:10;pointer-events:none;">
+            [${imagenesTarget.length} IMÁGENES]
+        </span>
+        </div>
+        <p>> ESTADO RED:
+            <span style="color: var(--color-terminal)">
+                ${datos.vista.estado_red}
+            </span>
+        </p>
+        <p>> LATENCIA: ${datos.vista.tiempo_respuesta_ms} ms</p>
+    `;
         document.getElementById('img-target-visor').addEventListener('click', () => {
-            const visor = document.getElementById('visor-tactico');
-            document.getElementById('imagen-ampliada').src = datos.vista.imagen_principal;
-            visor.classList.add('visibilidad-activa'); 
+        indiceImagenActual = 0;
+        mostrarImagenActual();
+        document
+            .getElementById('visor-tactico')
+            .classList.add('visibilidad-activa');
         });
-
-
         // --- PANEL 2: TECNOLOGÍA(Con colores en cada tecnología) ---
         const listaTrackers = datos.tecnologia.trackers_vigilancia.map(vg => {
             const colorElegido = coloresTech[vg] || 'var(--color-terminal)';
@@ -163,7 +195,6 @@ async function iniciarOperacion() {
                 </div>
             </div>
         `).join('');
-                
         panelMetricas.innerHTML = `
             <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--color-terminal); padding-bottom: 10px; margin-bottom: 10px;">
                 <span>IMÁGENES: ${datos.metricas.totales.imagenes}</span>
@@ -198,3 +229,31 @@ if (visor) {
         this.classList.remove('visibilidad-activa');
     });
 }
+document
+    .getElementById('btn-siguiente')
+    .addEventListener('click', (e) => {
+
+        e.stopPropagation();
+
+        indiceImagenActual++;
+
+        if(indiceImagenActual >= imagenesTarget.length){
+            indiceImagenActual = 0;
+        }
+
+        mostrarImagenActual();
+
+    });
+document
+    .getElementById('btn-anterior')
+    .addEventListener('click', (e) => {
+
+        e.stopPropagation();
+
+        indiceImagenActual--;
+
+        if(indiceImagenActual < 0){
+            indiceImagenActual = imagenesTarget.length - 1;
+        }
+        mostrarImagenActual();
+    });
