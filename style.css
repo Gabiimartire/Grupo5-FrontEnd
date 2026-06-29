@@ -1,56 +1,64 @@
-
+/* =========================================================
+   VARIABLES GLOBALES
+   ========================================================= */
 :root {
     --fondo-absoluto: #00040c;
     --color-terminal: #dc2626;
     --color-alerta: #fbbf24;
-    --borde-panel: 1px solid #dc2626;
     --sombra-neon: 0 0 10px rgba(220, 38, 38, 0.15);
-    --color-links: #008F11;
-    --sombra-links: #00FF41;
 }
-/* 2. LA LEY CONSTITUCIONAL Y RESETEO */
+
+/* =========================================================
+   RESET
+   ========================================================= */
 * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
 }
-/* 3. TIPOGRAFÍA Y FONDO */
+
+/* =========================================================
+   BODY
+   ========================================================= */
 body {
     background: var(--fondo-absoluto) radial-gradient(circle at center, #05131a 0%, #000000 100%);
     color: var(--color-terminal);
     font-family: 'Share Tech Mono', monospace;
-    margin: 0;
-    padding: 0;
     height: 100vh;
     overflow: hidden;
     text-transform: uppercase;
 }
 
-/* --- 1. EL RADAR (FONDO) --- */
+/* =========================================================
+   MAPA DE FONDO (RADAR)
+   ========================================================= */
 #mapa-bunker {
     position: absolute;
-    top: 0; 
+    top: 0;
     left: 0;
-    width: 100vw; 
+    width: 100vw;
     height: 100vh;
-    z-index: 1; /* El mapa queda en el fondo */
+    z-index: 1;
     background-color: #000;
 }
 
-/* --- 2. CONTENEDOR TÁCTICO (FRENTE) --- */
+/* =========================================================
+   CONTENEDOR TÁCTICO
+   ========================================================= */
 .bunker-container {
     position: relative;
-    z-index: 10; /* Los paneles quedan por encima del mapa */
+    z-index: 10;
     display: flex;
     flex-direction: column;
     height: 100vh;
     padding: 2vw;
-    box-sizing: border-box;
-    /* Crucial: permite que los clics traspasen las zonas vacías y lleguen al mapa */
-    pointer-events: none; 
+    /* Permite que los clics traspasen las zonas vacías al mapa */
+    pointer-events: none;
 }
 
-/* --- 3. CABECERA Y ENTRADA DE COMANDOS --- */
+/* =========================================================
+   CABECERA / CONSOLA DE ENTRADA
+   ========================================================= */
 .consola-input {
     display: flex;
     gap: 15px;
@@ -58,7 +66,7 @@ body {
     padding-bottom: 20px;
     margin-bottom: 20px;
     border-bottom: 1px solid rgba(0, 240, 255, 0.2);
-    pointer-events: auto; /* Reactivamos los clics acá */
+    pointer-events: auto;
 }
 
 .prompt-text {
@@ -95,7 +103,6 @@ body {
     display: flex;
     align-items: center;
     gap: 10px;
-    /* BLINDAJE GEOMÉTRICO: Esto corta las esquinas del botón */
     clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
     transition: 0.2s;
 }
@@ -111,40 +118,106 @@ body {
 
 @keyframes titilar {
     from { opacity: 1; }
-    to { opacity: 0.5; }
+    to   { opacity: 0.5; }
 }
 
-/* --- 4. MATRIZ DE PANELES --- */
-/* --- 4. MATRIZ DE PANELES --- */
+/* =========================================================
+   GRILLA DE PANELES
+   ========================================================= */
 .grid-paneles {
     display: grid;
     grid-template-columns: 1fr 1fr;
     grid-template-rows: 1fr 1fr;
     gap: 20px;
     flex-grow: 1;
-    min-height: 0; /* EL SEGURO: Evita que la grilla reviente el alto de la pantalla */
-    pointer-events: auto; 
+    min-height: 0;
+    pointer-events: auto;
 }
 
+/* =========================================================
+   PANELES
+   ========================================================= */
 .panel {
-    background: var(--fondo-panel-transparente);
+    background: rgba(0, 4, 12, 0.85);
     padding: 20px;
     display: flex;
     flex-direction: column;
     position: relative;
-    min-height: 0; /* EL SEGURO: Evita que el panel crezca más allá de su celda */
+    min-height: 0;
     clip-path: polygon(20px 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%, 0 20px);
     transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
-/* Estado cuando el usuario hace clic en expandir */
 
+/* Líneas de luz en los bordes del recorte */
+.panel::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 20px; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--color-terminal), transparent);
+}
+.panel::after {
+    content: "";
+    position: absolute;
+    bottom: 0; right: 20px; left: 0;
+    height: 2px;
+    background: linear-gradient(-90deg, var(--color-terminal), transparent);
+}
+
+/* Panel expandido (al hacer clic en maximizar) */
+.panel.expandido {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80vw;
+    height: 80vh;
+    z-index: 1000;
+    clip-path: none;
+    background: var(--fondo-absoluto);
+    border: 2px solid var(--color-terminal);
+    box-shadow: 0 0 50px rgba(220, 38, 38, 0.2);
+}
+
+/* Panel oscurecido mientras otro está expandido */
+.panel.dimmed {
+    opacity: 0.1;
+    pointer-events: none;
+    transition: opacity 0.4s ease;
+}
+
+/* =========================================================
+   CABECERA DE PANEL
+   ========================================================= */
+.panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 15px;
+    border-bottom: 1px solid rgba(0, 240, 255, 0.2);
+    padding-bottom: 5px;
+}
+
+.icon-titulo-panel {
+    display: flex;
+    gap: 10px;
+}
+
+.panel-titulo {
+    margin: 0;
+    font-size: 1.1rem;
+    color: #fff;
+    text-shadow: var(--sombra-neon);
+    letter-spacing: 2px;
+}
+
+/* Botón de maximizar panel */
 .btn-toggle-expand {
     background: transparent;
     border: 1px solid var(--color-terminal);
     color: var(--color-terminal);
     padding: 2px;
     cursor: pointer;
-    margin-left: auto; /* Empuja el botón a la derecha */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -154,175 +227,217 @@ body {
     background: var(--color-terminal);
     color: var(--fondo-absoluto);
 }
-/* Oscurecemos el resto del búnker mientras uno está expandido */
-.panel.dimmed {
-    opacity: 0.1;
-    pointer-events: none;
-    transition: opacity 0.4s ease; 
-}
 
-/* Líneas de luz arriba y abajo para destacar los cortes del panel */
-.panel::before {
-    content: ""; position: absolute; top: 0; left: 20px; right: 0; height: 2px;
-    background: linear-gradient(90deg, var(--color-terminal), transparent);
-}
-.panel::after {
-    content: ""; position: absolute; bottom: 0; right: 20px; left: 0; height: 2px;
-    background: linear-gradient(-90deg, var(--color-terminal), transparent);
-}
-
-.panel-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 15px;
-    border-bottom: 1px solid rgba(0, 240, 255, 0.2);
-    padding-bottom: 5px;
-}
-.icon-titulo-panel{
-    display: flex;
-    gap: 10px;
-}
-.panel-header .btn-expandir{
-    background-color: var(--sombra-neon);
-    color: var(--color-alerta);
-}
-.panel-header .btn-expandir:hover{
-    cursor:pointer;
-}
-.panel-titulo {
-    margin: 0;
-    font-size: 1.1rem;
-    color: #fff;
-    text-shadow: var(--sombra-neon);
-    letter-spacing: 2px;
-}
-
+/* =========================================================
+   CONTENIDO DE PANEL
+   ========================================================= */
 .contenido-panel {
     flex-grow: 1;
     overflow-y: auto;
-    overflow-x: hidden; /* ¡ESTA ES LA CLAVE! Prohíbe que se expanda horizontalmente */
+    overflow-x: hidden;
     color: #fff;
     font-size: 0.95rem;
-    min-height: 0; /* EL SEGURO: Obliga al texto a usar la barra de scroll */
-    padding-right: 5px; /* Separación para que la barra de scroll no pise las letras */
+    min-height: 0;
+    padding-right: 5px;
 }
 
-/* Barras de Scroll Tecnológicas */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: rgba(0,0,0,0.5); }
-::-webkit-scrollbar-thumb { background: var(--color-terminal); }
-
-/* FORMATO INTERNO DE DATOS JS */
+/* Párrafos internos de los paneles */
 .contenido-panel p {
-    display: flex; justify-content: space-between;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
-    padding-bottom: 4px; margin: 8px 0;
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding-bottom: 4px;
+    margin: 8px 0;
 }
 
+/* Título de sección dentro del panel tech */
+.titulo-resumen {
+    color: #fff;
+    font-size: 0.9rem;
+    margin: 10px 0 8px;
+}
+
+/* =========================================================
+   ENLACES (PANEL 3)
+   ========================================================= */
 .links {
     color: var(--color-terminal);
     text-decoration: none;
     display: block;
 }
-/* Esto fuerza a que cualquier enlace largo se corte y no rompa el diseño */
 
 .links:hover {
     background: rgba(0, 240, 255, 0.1);
 }
 
+/* =========================================================
+   BARRAS DE MÉTRICAS (PANEL 4)
+   ========================================================= */
 .animacion-barra {
     transition: width 1s ease-out;
     width: var(--ancho-final);
 }
 
-/* ANIMACIÓN DE CARGA */
+/* =========================================================
+   SCROLL PERSONALIZADO
+   ========================================================= */
+::-webkit-scrollbar       { width: 6px; }
+::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.5); }
+::-webkit-scrollbar-thumb { background: var(--color-terminal); }
+
+/* =========================================================
+   ANIMACIÓN DE CARGA
+   ========================================================= */
 .loader-tactico {
-    display: flex; flex-direction: column; gap: 10px; align-items: center; justify-content: center; height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
 }
 
 .loader-barra {
-    width: 80%; height: 2px; background: rgba(0, 240, 255, 0.2); position: relative; overflow: hidden;
+    width: 80%;
+    height: 2px;
+    background: rgba(0, 240, 255, 0.2);
+    position: relative;
+    overflow: hidden;
 }
 
 .loader-barra::after {
-    content: ""; position: absolute; top: 0; left: 0; height: 100%; width: 30%;
+    content: "";
+    position: absolute;
+    top: 0; left: 0;
+    height: 100%;
+    width: 30%;
     background: var(--color-terminal);
     animation: escaneo-carga 1s infinite ease-in-out;
 }
 
 @keyframes escaneo-carga {
-    0% { left: -30%; } 
+    0%   { left: -30%; }
     100% { left: 100%; }
 }
 
-/* --- 5. VISOR TÁCTICO DE IMÁGENES --- */
+/* =========================================================
+   VISOR TÁCTICO DE IMÁGENES
+   ========================================================= */
 .visor-oculto { display: none; }
+
 .visibilidad-activa {
-    display: flex !important; flex-direction: column; align-items: center; justify-content: center;
-    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-    background: rgba(2, 6, 8, 0.95); z-index: 9999;
+    display: flex !important;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(2, 6, 8, 0.95);
+    z-index: 9999;
 }
 
 .cerrar-visor {
-    position: absolute; top: 20px; right: 20px; color: var(--color-terminal); cursor: pointer; border: 1px solid var(--color-terminal); padding: 5px 10px;
+    position: absolute;
+    top: 20px; right: 20px;
+    color: var(--color-terminal);
+    cursor: pointer;
+    border: 1px solid var(--color-terminal);
+    padding: 5px 10px;
 }
 
-.contenedor-imagen{
-    width:90vw;
-    height:80vh;
-
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    gap:30px;
+.contenedor-imagen {
+    width: 90vw;
+    height: 80vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 30px;
 }
 
-.marco-imagen{
-    flex:1;
-    height:100%;
-
-    display:flex;
-    align-items:center;
-    justify-content:center;
+.marco-imagen {
+    flex: 1;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.marco-imagen img{
-    max-width:100%;
-    max-height:100%;
-
-    object-fit:contain;
-
-    border:2px solid var(--color-terminal);
-    box-shadow:var(--sombra-neon);
+.marco-imagen img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    border: 2px solid var(--color-terminal);
+    box-shadow: var(--sombra-neon);
 }
+
 .btn-nav-img {
-    background: transparent; color: var(--color-terminal); border: 1px solid var(--color-terminal); padding: 10px 15px; cursor: pointer;
+    background: transparent;
+    color: var(--color-terminal);
+    border: 1px solid var(--color-terminal);
+    padding: 10px 15px;
+    cursor: pointer;
 }
 
 #contador-imagen {
-    margin-top: 15px; color: #fff;
+    margin-top: 15px;
+    color: #fff;
 }
-/* Camuflaje táctico para la etiqueta del mapa */
-.leaflet-popup-content-wrapper, .leaflet-popup-tip {
+
+/* =========================================================
+   POPUP DEL MAPA (LEAFLET)
+   ========================================================= */
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
     background: rgba(2, 10, 15, 0.9);
     color: var(--color-terminal);
     border: 1px solid var(--color-terminal);
     border-radius: 0;
     font-family: 'Share Tech Mono', monospace;
 }
-.leaflet-popup-content { margin: 10px; font-weight: bold; }
 
-.panel.expandido {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 80vw;
-    height: 80vh;
-    z-index: 1000;
-    clip-path: none; /* Quitamos el corte para ver todo el panel */
-    background: var(--fondo-absoluto);
-    border: 2px solid var(--color-terminal);
-    box-shadow: 0 0 50px rgba(0, 240, 255, 0.2);
+.leaflet-popup-content {
+    margin: 10px;
+    font-weight: bold;
+}
+.fila-tech{
+    display:grid;
+    grid-template-columns:140px 1fr 35px;
+    align-items:center;
+    gap:10px;
+    margin:9px 0;
+}
+
+.tech-info{
+    display:flex;
+    align-items:center;
+    gap:8px;
+}
+
+.icono-tech{
+    width:15px;
+    height:15px;
+    color:var(--color-terminal);
+}
+
+.tech-barra{
+    height:7px;
+    background:rgba(255,255,255,.08);
+    border:1px solid rgba(255,255,255,.15);
+    overflow:hidden;
+}
+
+.tech-barra-fill{
+    height:100%;
+    transition:.6s;
+}
+
+.tech-numero{
+    text-align:right;
+    font-weight:bold;
+}
+.input-error{
+    border:1px solid var(--color-alerta)!important;
+    box-shadow:0 0 12px var(--color-alerta)!important;
 }
