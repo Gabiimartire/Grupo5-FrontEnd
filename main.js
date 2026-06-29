@@ -69,6 +69,15 @@ async function iniciarOperacion() {
         panelMetricas.innerHTML = msjErrorInput;
         return; 
     }
+    rastrearObjetivo(urlIngresada);
+    const todosLosPaneles = document.querySelectorAll('.panel'); 
+    
+    todosLosPaneles.forEach(panel => {
+        // Le damos medio segundo de transición para que no desaparezca de golpe
+        panel.style.opacity = '0.55'; 
+        // Desactivamos los clics por si el usuario intenta tocar algo invisible
+        panel.style.pointerEvents = 'none'; 
+    });
     botonEscaneo.innerText = '[ ESCANEANDO... ]';
     botonEscaneo.classList.add('boton-escaneando');
     botonEscaneo.disabled = true;
@@ -86,7 +95,6 @@ async function iniciarOperacion() {
     panelTech.innerHTML = mensajeCarga;
     panelEnlaces.innerHTML = mensajeCarga;
     panelMetricas.innerHTML = mensajeCarga;
-    inputObjetivo.value = ''; // Limpiamos el input
     //http://localhost:3000/api/escanear
     try {
         const [respuesta] = await Promise.all([
@@ -94,8 +102,7 @@ async function iniciarOperacion() {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ url: urlIngresada })
-            }),
-            new Promise(resolve => setTimeout(resolve, 3000)) 
+            }),      
         ]);
         if (!respuesta.ok) {
             throw new Error(`Enlace rechazado. Status: ${respuesta.status}`);
@@ -104,6 +111,10 @@ async function iniciarOperacion() {
         imagenesTarget = datos.vista.imagenes || [];        
         sndRadar.pause();           
         sndRadar.currentTime = 0;  
+        todosLosPaneles.forEach(panel => {
+            panel.style.opacity = '1'; 
+            panel.style.pointerEvents = 'auto'; // Volvemos a habilitar los clics
+        });
         // --- PANEL 1: VISTA  ---
         panelVista.innerHTML = `
     <div style="border: 1px solid var(--color-terminal); height: 120px; margin-bottom: 15px; position: relative; overflow: hidden; background: #000;">
@@ -171,7 +182,10 @@ async function iniciarOperacion() {
         }, 100);
 
         // --- PANEL 3: ENLACES ---
-        const listaEnlaces = datos.enlaces.map(link => `<a class="links" href="${link}" target="_blank" style="margin-bottom: 5px; border-bottom: 1px solid rgba(255,0,0,0.2);"> > ${link}</a>`).join('');
+        const listaEnlaces = datos.enlaces.map(link => {
+        const textoVisible = link.length > 60 ? link.substring(0, 59) + "..." : link;
+        return `<a class="links" href="${link}" target="_blank" title="${link}"> > ${textoVisible}</a>`;
+    }).join('');
         panelEnlaces.innerHTML = '<div id="tipeo-enlaces"></div>'
         setTimeout(() => {
             new Typed('#tipeo-enlaces', {
@@ -208,6 +222,11 @@ async function iniciarOperacion() {
         botonEscaneo.classList.remove('boton-escaneando');
         botonEscaneo.disabled = false;
     } catch (error) {
+        const todosLosPaneles = document.querySelectorAll('.panel');
+        todosLosPaneles.forEach(panel => {
+            panel.style.opacity = '1';
+            panel.style.pointerEvents = 'auto';
+        });
         sndRadar.pause();           
         sndRadar.currentTime = 0;
         sndError.play();           
@@ -220,9 +239,38 @@ async function iniciarOperacion() {
         botonEscaneo.innerText = '[INICIAR_ESCANEO]';
         botonEscaneo.classList.remove('boton-escaneando');
         botonEscaneo.disabled = false;
+        lucide.createIcons();
     }
-    sndExito.play();
 }
+
+    // 1. Seleccionamos todos los botones de expansión
+const botonesToggle = document.querySelectorAll('.btn-toggle-expand');
+
+botonesToggle.forEach(btn => {
+    btn.addEventListener('click', (e) => {
+        const panel = e.target.closest('.panel');
+        const iconContainer = btn.querySelector('i');
+        const isExpanding = !panel.classList.contains('expandido');
+
+        if (isExpanding) {
+            // ESTADO EXPANDIR
+            panel.classList.add('expandido');
+            document.querySelectorAll('.panel').forEach(p => {
+                if (p !== panel) p.classList.add('dimmed');
+            });
+            // Cambiamos el icono a 'X' o 'Minimize'
+            iconContainer.setAttribute('data-lucide', 'x');
+        } else {
+            // ESTADO CERRAR
+            panel.classList.remove('expandido');
+            document.querySelectorAll('.panel').forEach(p => p.classList.remove('dimmed'));
+            // Cambiamos el icono de vuelta a 'Maximize'
+            iconContainer.setAttribute('data-lucide', 'maximize-2');
+        }
+        // Refrescamos los iconos de Lucide para que el cambio se vea
+        lucide.createIcons();
+    });
+});
 const visor = document.getElementById('visor-tactico');
 if (visor) {
     visor.addEventListener('click', function() {
@@ -232,11 +280,8 @@ if (visor) {
 document
     .getElementById('btn-siguiente')
     .addEventListener('click', (e) => {
-
         e.stopPropagation();
-
         indiceImagenActual++;
-
         if(indiceImagenActual >= imagenesTarget.length){
             indiceImagenActual = 0;
         }
@@ -257,3 +302,5 @@ document
         }
         mostrarImagenActual();
     });
+
+lucide.createIcons();

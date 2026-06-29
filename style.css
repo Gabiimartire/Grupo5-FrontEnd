@@ -1,4 +1,4 @@
-/* 1. VARIABLES GLOBALES (Estética CTU) */
+
 :root {
     --fondo-absoluto: #00040c;
     --color-terminal: #dc2626;
@@ -8,7 +8,6 @@
     --color-links: #008F11;
     --sombra-links: #00FF41;
 }
-
 /* 2. LA LEY CONSTITUCIONAL Y RESETEO */
 * {
     box-sizing: border-box;
@@ -17,277 +16,313 @@
 }
 /* 3. TIPOGRAFÍA Y FONDO */
 body {
-    background-color: var(--fondo-absoluto);
+    background: var(--fondo-absoluto) radial-gradient(circle at center, #05131a 0%, #000000 100%);
     color: var(--color-terminal);
-    /* El secreto de la terminal: fuente monoespaciada */
-    font-family: 'Courier New', Courier, monospace;
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-header{
-    display: flex;
-    align-items: center;
-}
-header .prompt-text{
-    text-shadow: 0 0 10px var(--color-terminal);
-    font-weight: bolder;
-}
-/* 4. CONTENEDOR MAESTRO */
-.bunker-container {
-    width: 95%;
-    max-width: 1200px;
-    height: 90vh;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
-/* 5. CONSOLA DE ENTRADA */
-.consola-input {
-    display: flex;
-    gap: 15px;
-    padding: 20px;
-    border: var(--borde-panel);
-    box-shadow: var(--sombra-neon);
-    background-color: #0a0a0a;
-}
-.consola-input input {
-    flex-grow: 1; /* El input ocupa todo el espacio sobrante */
-    background: transparent;
-    border: none;
-    border-bottom: 1px solid var(--color-terminal);
-    color: var(--color-terminal);
-    font-family: inherit;
-    font-size: 1.2rem;
-    outline: none;
-}
-.consola-input button {
-    background-color: var(--color-terminal);
-    color: var(--fondo-absoluto);
-    border: none;
-    padding: 10px 20px;
-    font-weight: bold;
-    font-family: inherit;
-    cursor: pointer;
-    transition: 0.5s;
-}
-.consola-input button:hover {
-    background-color: var(--color-alerta);
-    box-shadow: 0 0 15px var(--color-alerta);
-    transition: 0.2s;
-}
-/* enfasis en el input seleccionado*/
-.consola-input input:focus {
-    box-shadow: 0 5px 10px var(--color-alerta);
-    transition: 0.5s;
-}
-
-/* 6. GRILLA TÁCTICA (CSS GRID) */
-.grid-paneles {
-    display: grid;
-    /* Definimos 2 columnas exactamente iguales */
-    grid-template-columns: 1fr 1fr;
-    /* Definimos 2 filas exactamente iguales que ocupen el resto del alto */
-    grid-template-rows: 1fr 1fr;
-    gap: 20px;
-    flex-grow: 1;
-    /**para que se pueda agregar scroll para los paneles*/
-    min-height: 0;
-}
-/* 7. DISEÑO DE CADA PANEL */
-.panel {
-    border: var(--borde-panel);
-    background-color: #0a0a0a;
-    display: flex;
-    flex-direction: column;
-    box-shadow: var(--sombra-neon);
-    /* para agregar scroll en cada  panel */
-    
-    min-height: 0; 
-    overflow: hidden
-}
-.panel-header {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: var(--color-terminal);
-    opacity: 0.8;
-    padding: 8px 15px;
-}
-.panel-titulo {
-    font-size: 1rem;
-    border-bottom: none;
+    font-family: 'Share Tech Mono', monospace;
     margin: 0;
-    color: var(--color-alerta);
-}
-/* 8. EL CONTROL DE DESBORDAMIENTO (OVERFLOW) */
-.contenido-panel {
-    flex-grow: 1;
-    font-size: 0.9rem;
-    line-height: 1.5;
-    padding: 20px 15px 15px 15px;
-}
-.scroll-activo {
-    /* La orden que evita que el diseño explote */
-    overflow-y: auto;
-    max-height: 100%;
+    padding: 0;
+    height: 100vh;
+    overflow: hidden;
+    text-transform: uppercase;
 }
 
-body::after {
-    content: " ";
-    display: block;
+/* --- 1. EL RADAR (FONDO) --- */
+#mapa-bunker {
     position: absolute;
-    top: 0; left: 0; bottom: 0; right: 0;
-    /* Crea micro-líneas horizontales oscuras */
-    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
-    background-size: 100% 4px;
-    z-index: 100;
-    /* Evita que el efecto bloquee los clics en tu input y botones */
+    top: 0; 
+    left: 0;
+    width: 100vw; 
+    height: 100vh;
+    z-index: 1; /* El mapa queda en el fondo */
+    background-color: #000;
+}
+
+/* --- 2. CONTENEDOR TÁCTICO (FRENTE) --- */
+.bunker-container {
+    position: relative;
+    z-index: 10; /* Los paneles quedan por encima del mapa */
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    padding: 2vw;
+    box-sizing: border-box;
+    /* Crucial: permite que los clics traspasen las zonas vacías y lleguen al mapa */
     pointer-events: none; 
 }
 
-.boton-escaneando {
-    background-color: var(--color-alerta);
-    color: #000 ;
-    border-color: var(--color-alerta) ;
-    box-shadow: 0 0 20px var(--color-alerta) ;
-    cursor: not-allowed ; /* Cambia la flechita por el símbolo de prohibido */
-    animation: pulso-carga 0.8s infinite alternate;
+/* --- 3. CABECERA Y ENTRADA DE COMANDOS --- */
+.consola-input {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    padding-bottom: 20px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid rgba(0, 240, 255, 0.2);
+    pointer-events: auto; /* Reactivamos los clics acá */
 }
-@keyframes pulso-carga {
-    from { opacity: 1; }
-    to { opacity: 0.4; }
+
+.prompt-text {
+    font-weight: bold;
+    text-shadow: var(--sombra-neon);
 }
-/* links con color matrix */
-.links{ 
-    color: var(--color-links);
-    text-shadow: 0 0 5px var(--sombra-links);
-    padding-left: 5px;
-    display: block; /*salto de linea*/
-    text-decoration: none;
-}
-.links:hover {
-    color: var(--sombra-links);
-    text-shadow: 0 0 10px var(--sombra-links);
+
+#target-url {
+    flex-grow: 1;
+    padding: 10px 15px;
+    background: rgba(0, 240, 255, 0.05);
+    border: none;
+    border-left: 4px solid var(--color-terminal);
+    color: #fff;
+    font-family: inherit;
+    font-size: 1.2rem;
+    outline: none;
     transition: 0.3s;
 }
-/* estilos del visor táctico */
-#visor-tactico { /*posicionado en frente con opacity 0 para poder hacer efecto transition*/
-    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-    inset: 0;
-    background-color: rgba(0, 0, 0, 0.9);
-    z-index: 9999;     
-    display: flex; flex-direction: column; justify-content: center; align-items: center;
-    opacity: 0;
-    pointer-events: none;    
-    transition: opacity 0.8s ease-in-out; 
-}
-#visor-tactico.visibilidad-activa {
-    opacity: 1;             
-    pointer-events: auto;    
-}
-#imagen-ampliada {
-    max-width: calc(95vw - 200px);
-    max-height: 85vh;
-    width: auto;
-    height: auto;
-    object-fit: contain;
-    border: 2px solid var(--color-terminal);
-    box-shadow: 0 0 30px var(--color-terminal);
-}
-.cerrar-visor { color: var(--color-alerta); font-size: 1.2rem; font-weight: bold; margin-bottom: 20px; cursor: pointer; text-shadow: 0 0 10px var(--color-alerta); }
-.cerrar-visor:hover { color: var(--color-terminal); }
-.miniatura-target { cursor: crosshair; transition: 0.3s; }
-.miniatura-target:hover { opacity: 0.8 !important; }
 
-
-
-/* Detalles para embellecer la barra de scroll (opcional pero cool) */
-::-webkit-scrollbar {
-    width: 8px;
+#target-url:focus {
+    background: rgba(0, 240, 255, 0.15);
+    border-left-color: #fff;
 }
-::-webkit-scrollbar-thumb {
+
+#btn-scan {
+    padding: 10px 25px;
+    background: transparent;
+    color: var(--color-terminal);
+    border: 1px solid var(--color-terminal);
+    font-family: inherit;
+    font-size: 1.2rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    /* BLINDAJE GEOMÉTRICO: Esto corta las esquinas del botón */
+    clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+    transition: 0.2s;
+}
+
+#btn-scan:hover {
     background: var(--color-terminal);
+    color: var(--fondo-absoluto);
 }
 
-/*loaders*/
-.loader-tactico {
+.boton-escaneando {
+    animation: titilar 1s infinite alternate;
+}
+
+@keyframes titilar {
+    from { opacity: 1; }
+    to { opacity: 0.5; }
+}
+
+/* --- 4. MATRIZ DE PANELES --- */
+/* --- 4. MATRIZ DE PANELES --- */
+.grid-paneles {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 20px;
+    flex-grow: 1;
+    min-height: 0; /* EL SEGURO: Evita que la grilla reviente el alto de la pantalla */
+    pointer-events: auto; 
+}
+
+.panel {
+    background: var(--fondo-panel-transparente);
+    padding: 20px;
     display: flex;
     flex-direction: column;
+    position: relative;
+    min-height: 0; /* EL SEGURO: Evita que el panel crezca más allá de su celda */
+    clip-path: polygon(20px 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%, 0 20px);
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+/* Estado cuando el usuario hace clic en expandir */
+
+.btn-toggle-expand {
+    background: transparent;
+    border: 1px solid var(--color-terminal);
+    color: var(--color-terminal);
+    padding: 2px;
+    cursor: pointer;
+    margin-left: auto; /* Empuja el botón a la derecha */
+    display: flex;
     align-items: center;
     justify-content: center;
-    height: 100%;
-    min-height: 100px; 
+}
+
+.btn-toggle-expand:hover {
+    background: var(--color-terminal);
+    color: var(--fondo-absoluto);
+}
+/* Oscurecemos el resto del búnker mientras uno está expandido */
+.panel.dimmed {
+    opacity: 0.1;
+    pointer-events: none;
+    transition: opacity 0.4s ease; 
+}
+
+/* Líneas de luz arriba y abajo para destacar los cortes del panel */
+.panel::before {
+    content: ""; position: absolute; top: 0; left: 20px; right: 0; height: 2px;
+    background: linear-gradient(90deg, var(--color-terminal), transparent);
+}
+.panel::after {
+    content: ""; position: absolute; bottom: 0; right: 20px; left: 0; height: 2px;
+    background: linear-gradient(-90deg, var(--color-terminal), transparent);
+}
+
+.panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 15px;
+    border-bottom: 1px solid rgba(0, 240, 255, 0.2);
+    padding-bottom: 5px;
+}
+.icon-titulo-panel{
+    display: flex;
+    gap: 10px;
+}
+.panel-header .btn-expandir{
+    background-color: var(--sombra-neon);
     color: var(--color-alerta);
-    text-shadow: 0 0 5px var(--color-alerta);
 }
-.loader-texto {
-    animation: parpadeo-alerta 1s infinite alternate;
+.panel-header .btn-expandir:hover{
+    cursor:pointer;
 }
-.loader-barra {
-    width: 60%;
-    height: 2px;
-    background-color: var(--color-alerta);
-    box-shadow: 0 0 10px var(--color-alerta);
-    margin-top: 10px;
-    animation: barrido-radar 1.2s infinite ease-in-out;
-    transform-origin: center;
-}
-@keyframes parpadeo-alerta {
-    0% { opacity: 0.3; }
-    100% { opacity: 1; }
-}
-@keyframes barrido-radar {
-    0% { transform: scaleX(0); opacity: 0; }
-    50% { transform: scaleX(1); opacity: 1; }
-    100% { transform: scaleX(0); opacity: 0; }
+.panel-titulo {
+    margin: 0;
+    font-size: 1.1rem;
+    color: #fff;
+    text-shadow: var(--sombra-neon);
+    letter-spacing: 2px;
 }
 
-/*ANIMACIONES PARA PODER USAR EL TYPE EN PANEL 1 Y 4*/
-@keyframes fade-tactico {
-    from { opacity: 0; }
-    to { opacity: 0.4; } /* Termina en 0.4 para mantener tu marca de agua legible */
+.contenido-panel {
+    flex-grow: 1;
+    overflow-y: auto;
+    overflow-x: hidden; /* ¡ESTA ES LA CLAVE! Prohíbe que se expanda horizontalmente */
+    color: #fff;
+    font-size: 0.95rem;
+    min-height: 0; /* EL SEGURO: Obliga al texto a usar la barra de scroll */
+    padding-right: 5px; /* Separación para que la barra de scroll no pise las letras */
 }
 
-.animacion-fade {
-    animation: fade-tactico 1.5s ease-out forwards;
+/* Barras de Scroll Tecnológicas */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: rgba(0,0,0,0.5); }
+::-webkit-scrollbar-thumb { background: var(--color-terminal); }
+
+/* FORMATO INTERNO DE DATOS JS */
+.contenido-panel p {
+    display: flex; justify-content: space-between;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    padding-bottom: 4px; margin: 8px 0;
 }
 
-/* Estiramiento de las barras del Panel 4 */
-@keyframes llenar-barra {
-    from { width: 0%; }
-    to { width: var(--ancho-final); }
+.links {
+    color: var(--color-terminal);
+    text-decoration: none;
+    display: block;
+}
+/* Esto fuerza a que cualquier enlace largo se corte y no rompa el diseño */
+
+.links:hover {
+    background: rgba(0, 240, 255, 0.1);
 }
 
 .animacion-barra {
-    animation: llenar-barra 1.5s ease-out forwards;
+    transition: width 1s ease-out;
+    width: var(--ancho-final);
 }
+
+/* ANIMACIÓN DE CARGA */
+.loader-tactico {
+    display: flex; flex-direction: column; gap: 10px; align-items: center; justify-content: center; height: 100%;
+}
+
+.loader-barra {
+    width: 80%; height: 2px; background: rgba(0, 240, 255, 0.2); position: relative; overflow: hidden;
+}
+
+.loader-barra::after {
+    content: ""; position: absolute; top: 0; left: 0; height: 100%; width: 30%;
+    background: var(--color-terminal);
+    animation: escaneo-carga 1s infinite ease-in-out;
+}
+
+@keyframes escaneo-carga {
+    0% { left: -30%; } 
+    100% { left: 100%; }
+}
+
+/* --- 5. VISOR TÁCTICO DE IMÁGENES --- */
+.visor-oculto { display: none; }
+.visibilidad-activa {
+    display: flex !important; flex-direction: column; align-items: center; justify-content: center;
+    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(2, 6, 8, 0.95); z-index: 9999;
+}
+
+.cerrar-visor {
+    position: absolute; top: 20px; right: 20px; color: var(--color-terminal); cursor: pointer; border: 1px solid var(--color-terminal); padding: 5px 10px;
+}
+
 .contenedor-imagen{
+    width:90vw;
+    height:80vh;
+
     display:flex;
     align-items:center;
-    gap:20px;
+    justify-content:center;
+    gap:30px;
 }
 
-.btn-nav-img{
-    background:none;
-    border:1px solid var(--color-terminal);
-    color:var(--color-terminal);
-    font-size:2rem;
-    width:60px;
-    height:60px;
-    cursor:pointer;
-    transition:0.3s;
+.marco-imagen{
+    flex:1;
+    height:100%;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
 }
 
-.btn-nav-img:hover{
-    background:var(--color-terminal);
-    color:black;
-    box-shadow:0 0 15px var(--color-terminal);
+.marco-imagen img{
+    max-width:100%;
+    max-height:100%;
+
+    object-fit:contain;
+
+    border:2px solid var(--color-terminal);
+    box-shadow:var(--sombra-neon);
+}
+.btn-nav-img {
+    background: transparent; color: var(--color-terminal); border: 1px solid var(--color-terminal); padding: 10px 15px; cursor: pointer;
 }
 
-#contador-imagen{
-    margin-top:15px;
-    color:var(--color-alerta);
-    font-weight:bold;
+#contador-imagen {
+    margin-top: 15px; color: #fff;
+}
+/* Camuflaje táctico para la etiqueta del mapa */
+.leaflet-popup-content-wrapper, .leaflet-popup-tip {
+    background: rgba(2, 10, 15, 0.9);
+    color: var(--color-terminal);
+    border: 1px solid var(--color-terminal);
+    border-radius: 0;
+    font-family: 'Share Tech Mono', monospace;
+}
+.leaflet-popup-content { margin: 10px; font-weight: bold; }
+
+.panel.expandido {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80vw;
+    height: 80vh;
+    z-index: 1000;
+    clip-path: none; /* Quitamos el corte para ver todo el panel */
+    background: var(--fondo-absoluto);
+    border: 2px solid var(--color-terminal);
+    box-shadow: 0 0 50px rgba(0, 240, 255, 0.2);
 }
