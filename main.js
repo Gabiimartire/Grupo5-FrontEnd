@@ -814,25 +814,6 @@ if (btnAnterior) {
         mostrarImagenActual();
     });
 }
-function activarPinAlFrente() {
-    document.body.classList.add("mapa-pin-activo");
-}
-function ocultarPinAlFrente() {
-    document.body.classList.remove("mapa-pin-activo");
-}
-document.addEventListener("click", (e) => {
-    const tocoPin = e.target.closest(
-        ".leaflet-marker-icon, .leaflet-marker-shadow, .leaflet-popup, .leaflet-popup-content, .leaflet-interactive"
-    );
-    if (tocoPin) {
-        e.stopPropagation();
-        activarPinAlFrente();
-        return;
-    }
-    const tocoPanel = e.target.closest(".panel");
-    if (tocoPanel) {
-        ocultarPinAlFrente();
-    }
-}, true);
+
 cargarEstadoInicial();
 lucide.createIcons();

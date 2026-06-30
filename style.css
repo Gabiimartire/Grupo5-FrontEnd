@@ -760,35 +760,6 @@ body {
     font-weight: bold;
 }
 
-body.mapa-pin-activo #mapa-bunker {
-    z-index: 2000;
-    pointer-events: none;
-}
-
-body.mapa-pin-activo #mapa-bunker .leaflet-tile-pane,
-body.mapa-pin-activo #mapa-bunker .leaflet-overlay-pane,
-body.mapa-pin-activo #mapa-bunker .leaflet-shadow-pane {
-    opacity: 0;
-}
-
-body.mapa-pin-activo #mapa-bunker .leaflet-marker-pane,
-body.mapa-pin-activo #mapa-bunker .leaflet-popup-pane {
-    opacity: 1;
-    pointer-events: auto;
-}
-
-body.mapa-pin-activo #mapa-bunker .leaflet-marker-icon,
-body.mapa-pin-activo #mapa-bunker .leaflet-marker-shadow,
-body.mapa-pin-activo #mapa-bunker .leaflet-popup,
-body.mapa-pin-activo #mapa-bunker .leaflet-popup * {
-    pointer-events: auto;
-}
-
-body.mapa-pin-activo .bunker-container,
-body.mapa-pin-activo .grid-paneles,
-body.mapa-pin-activo .panel {
-    pointer-events: auto;
-}
 
 ::-webkit-scrollbar {
     width: 6px;
